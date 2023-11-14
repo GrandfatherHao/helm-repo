@@ -1,0 +1,29 @@
+{{- if .Capabilities.APIVersions.Has "apps/v1" -}}
+apiVersion: apps/v1
+{{ else }}
+apiVersion: extensions/v1beta1
+{{- end -}}
+kind: Deployment
+metadata:
+  name: {{ include "app.name" . }}
+  labels:
+    #include是调用命名模板，. 是传递给模板的上下文，nindent 4 表示向右缩进4个空格
+    {{- include "mychart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+    {{- include "app.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+    {{- include "app.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.name  | required "ImageName is required!" }}:{{ .Values.image.tags }}
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+        ports:
+        - containerPort: {{ .Values.service.containerPort }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

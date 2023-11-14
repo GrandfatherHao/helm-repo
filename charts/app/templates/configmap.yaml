@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  #载入文件
+  {{- range $key,$value := .Files.Glob "config/*.conf" }}
+  {{ base $key }}: |-
+    {{- $value | toString | nindent 4 }}
+  {{- end }}

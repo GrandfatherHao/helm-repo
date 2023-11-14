@@ -1,0 +1,84 @@
+#Pod的名称
+nameOverride: "lyh-app"
+
+#Pod安全
+SecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+
+#Pod相关的ConfigMap配置
+AppConfig:
+  nginx.conf: |-
+    server: {
+      listen 80;
+      server_name app.oldxu.net;
+      localtion / {
+        index index.html;
+      }
+    }
+  nginx-status.conf: |-
+    server {
+      listen 8899;
+      stub_status;
+    }
+
+#Pod环境变量
+env:
+- name: username
+  value: "oldxu"
+- name: password
+  value: "xuliangwei"
+
+#判断ingress
+ingress:
+  enabled: true
+  ClassName: "nginx"
+  host: app-tls.oldxu.net
+
+#TLS配置段，不启用则不会使用这一段配置
+tls:
+  enabled: true
+  CertPath: "ssl/server.crt"
+  KeyPath: "ssl/server.key"
+
+#测试的Version
+version: ''
+
+
+configmap:
+  username: "oldxu"
+  password: "hello"
+
+#副本数
+replicas: '2'
+
+#Pod镜像和tags
+image:
+  name: "uhub.service.ucloud.cn/oldxu/demoapp"
+  tags: "v1.0"
+
+#镜像的拉取策略：空默认为IfNotPresent、Never、Always
+imagePullPolicy: ""
+
+#Service的端口和Port的端口
+service:
+  port: 80
+  containerPort: 80
+
+#资源限制
+resources:
+  requests:
+    cpu: 10m
+    memory: 100Mi
+  limits:
+    cpu: 10m
+    memory: 100Mi
+  
+#Pod的探针检测
+readinressProbe:
+  failureThreshold: 3
+  httpGet:
+    path: /
+    port: 80
+  periodSeconds: 1
+  timeoutSeconds: 15
